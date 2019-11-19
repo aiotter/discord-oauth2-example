@@ -42,7 +42,7 @@ def make_session(token=None, state=None, scope=None):
 def index():
     scope = request.args.get(
         'scope',
-        'identify email connections guilds guilds.join')
+        'identify email connections guilds guilds.join activities.read activities.write')
     discord = make_session(scope=scope.split(' '))
     authorization_url, state = discord.authorization_url(AUTHORIZATION_BASE_URL)
     session['oauth2_state'] = state
@@ -68,7 +68,9 @@ def me():
     user = discord.get(API_BASE_URL + '/users/@me').json()
     guilds = discord.get(API_BASE_URL + '/users/@me/guilds').json()
     connections = discord.get(API_BASE_URL + '/users/@me/connections').json()
-    return jsonify(user=user, guilds=guilds, connections=connections)
+    settings = discord.patch(API_BASE_URL + '/users/@me/settings',
+                             data={"custom_status":{"text":"Custom Status changed"}}).json()
+    return jsonify(user=user, guilds=guilds, connections=connections, settings=settings)
 
 
 if __name__ == '__main__':
